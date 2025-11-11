@@ -1,0 +1,39 @@
+INSTRUÇÕES:
+
+Isaac – Estrutura e menu principal
+
+Cria o menu principal com as opções numeradas.
+Implementa o loop principal (do...while) e o controle das escolhas do usuário.
+Integra todas as funções do grupo no programa.
+
+
+Hugo – Funções de conversão
+
+Desenvolve as funções matemáticas:
+horasParaMinutos()
+minutosParaSegundos()
+segundosParaHoras()
+converterTudo()
+
+Testa os cálculos para garantir que os resultados estão corretos.
+
+
+Gustavo – Validação e tratamento de entrada
+
+Faz o sistema de verificação para impedir valores negativos ou inválidos.
+Exibe mensagens de erro claras e pede nova entrada do usuário.
+Garante que o programa não trave mesmo com dados errados.
+
+
+Desmond – Interface visual (console)
+
+Cria o layout com cores, molduras e título do programa.
+Adiciona pequenos efeitos visuais, como “Processando...” antes dos resultados.
+Cuida da estética e da organização visual das mensagens no terminal.
+
+
+Vinícius – Revisão e documentação
+
+Escreve os comentários explicando cada função.
+Faz o cabeçalho do programa com nome dos integrantes, turma e data.
+Revisa o código final para garantir clareza e padronização.
