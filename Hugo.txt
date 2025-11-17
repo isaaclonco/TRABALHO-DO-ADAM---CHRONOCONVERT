@@ -1,0 +1,86 @@
+#include <stdio.h>
+
+int horasParaMinutos(int horas) {
+ horas * 60;
+}
+
+
+int minutosParaSegundos(int minutos) {
+    minutos * 60;
+}
+
+float segundosParaHoras(int segundos) {
+    return segundos / 3600.0;
+}
+
+void converterTudo(int horas, int minutos, int segundos) {
+    int total_segundos = horas * 3600 + minutos * 60 + segundos;
+    float total_minutos = total_segundos / 60.0;
+    float total_horas   = total_segundos / 3600.0;
+
+    printf("\n=== Conversão Completa ===\n");
+    printf("Entrada: %dh %dm %ds\n", horas, minutos, segundos);
+    printf("Total em segundos: %d\n", total_segundos);
+    printf("Total em minutos: %.2f\n", total_minutos);
+    printf("Total em horas: %.4f\n", total_horas);
+    printf("==========================\n");
+}
+
+int main() {
+    int opcao;
+    int horas, minutos, segundos;
+
+    do {
+        printf("\n");
+        printf("=========== MENU ===========\n");
+        printf("1 - Converter horas para minutos\n");
+        printf("2 - Converter minutos para segundos\n");
+        printf("3 - Converter segundos para horas\n");
+        printf("4 - Converter tudo (h, m, s)\n");
+        printf("0 - Sair\n");
+        printf("============================\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+
+        switch(opcao) {
+
+            case 1:
+                printf("Digite a quantidade de horas: ");
+                scanf("%d", &horas);
+                printf("%d horas = %d minutos\n", horas, horasParaMinutos(horas));
+                break;
+
+            case 2:
+                printf("Digite a quantidade de minutos: ");
+                scanf("%d", &minutos);
+                printf("%d minutos = %d segundos\n", minutos, minutosParaSegundos(minutos));
+                break;
+
+            case 3:
+                printf("Digite a quantidade de segundos: ");
+                scanf("%d", &segundos);
+                printf("%d segundos = %.2f horas\n", segundos, segundosParaHoras(segundos));
+                break;
+
+            case 4:
+                printf("Digite horas: ");
+                scanf("%d", &horas);
+                printf("Digite minutos: ");
+                scanf("%d", &minutos);
+                printf("Digite segundos: ");
+                scanf("%d", &segundos);
+                converterTudo(horas, minutos, segundos);
+                break;
+
+            case 0:
+                printf("Encerrando o programa...\n");
+                break;
+
+            default:
+                printf("Opção inválida! Tente novamente.\n");
+        }
+
+    } while (opcao != 0);
+
+    
+}
