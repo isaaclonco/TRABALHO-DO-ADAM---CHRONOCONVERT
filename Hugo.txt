@@ -10,7 +10,7 @@ int minutosParaSegundos(int minutos) {
 }
 
 float segundosParaHoras(int segundos) {
-    return segundos / 3600.0;
+   segundos / 3600.0;
 }
 
 void converterTudo(int horas, int minutos, int segundos) {
@@ -84,3 +84,4 @@ int main() {
 
     
 }
+
