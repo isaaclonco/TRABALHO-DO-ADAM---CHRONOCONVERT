@@ -1,1 +1,503 @@
+/*
+================================================================================
+    CONVERSOR DE TEMPO - HORAS, MINUTOS E SEGUNDOS
+================================================================================
+    
+    Integrantes do Grupo:
+    - Isaac: Estrutura e menu principal
+    - Hugo: Funcoes de conversao
+    - Gustavo: Validacao e tratamento de entrada
+    - Desmond: Interface visual (console)
+    - Vinicius: Revisao e documentacao
+    
+    Turma: [Sua Turma]
+    Data: Novembro/2025
+    
+    Descricao:
+    Este programa permite converter valores de tempo entre diferentes unidades
+    (horas, minutos e segundos), com validacao de entrada e interface visual.
+    
+================================================================================
+*/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#ifdef _WIN32
+    #include <windows.h>
+    #define CLEAR "cls"
+    void configurarConsole() {
+        SetConsoleOutputCP(65001);
+        system("mode con cols=90 lines=35");
+    }
+#else
+    #include <unistd.h>
+    #define CLEAR "clear"
+    void configurarConsole() {
+        printf("\e[8;35;90t");
+    }
+#endif
+
+// ============================================================================
+// DEFINICOES DE CORES E ESTILOS
+// ============================================================================
+
+#define RESET       "\033[0m"
+#define BOLD        "\033[1m"
+#define DIM         "\033[2m"
+
+// Cores principais
+#define AZUL        "\033[38;5;33m"
+#define VERDE       "\033[38;5;46m"
+#define AMARELO     "\033[38;5;226m"
+#define VERMELHO    "\033[38;5;196m"
+#define CIANO       "\033[38;5;51m"
+#define MAGENTA     "\033[38;5;201m"
+#define LARANJA     "\033[38;5;214m"
+#define ROXO        "\033[38;5;129m"
+
+// Cores de fundo
+#define BG_ESCURO   "\033[48;5;235m"
+#define BG_MEDIO    "\033[48;5;238m"
+
+// ============================================================================
+// PROTOTIPOS DAS FUNCOES - Hugo
+// ============================================================================
+
+double horasParaMinutos(double horas);
+double minutosParaSegundos(double minutos);
+double segundosParaHoras(double segundos);
+double horasParaSegundos(double horas);
+double minutosParaHoras(double minutos);
+double segundosParaMinutos(double segundos);
+void converterTudo(double valor, int tipoOrigem);
+
+// ============================================================================
+// PROTOTIPOS DAS FUNCOES DE INTERFACE - Desmond
+// ============================================================================
+
+void exibirCabecalho();
+void exibirMenu();
+void exibirRodape();
+void efeitoProcessando();
+void limparTela();
+void desenharLinhaDupla(int largura);
+void desenharLinhaSimples(int largura);
+void desenharLinhaPontilhada(int largura);
+void exibirMensagemSucesso(const char *mensagem);
+void exibirMensagemErro(const char *mensagem);
+void aguardarEnter();
+void exibirAnimacaoInicial();
+
+// ============================================================================
+// PROTOTIPOS DAS FUNCOES DE VALIDACAO - Gustavo
+// ============================================================================
+
+double lerNumeroPositivo(const char *mensagem);
+int lerOpcaoMenu();
+int validarEntrada();
+
+// ============================================================================
+// FUNCAO PRINCIPAL - Isaac
+// ============================================================================
+
+int main() {
+    int opcao;
+    double valor, resultado;
+    
+    configurarConsole();
+    exibirAnimacaoInicial();
+    
+    // Loop principal do programa
+    do {
+        limparTela();
+        exibirCabecalho();
+        exibirMenu();
+        exibirRodape();
+        
+        opcao = lerOpcaoMenu();
+        
+        switch(opcao) {
+            case 1: // Horas -> Minutos
+                limparTela();
+                exibirCabecalho();
+                printf("\n");
+                desenharLinhaDupla(80);
+                printf(BOLD AZUL "                      CONVERTER HORAS PARA MINUTOS" RESET "\n");
+                desenharLinhaDupla(80);
+                valor = lerNumeroPositivo("\n  " AMARELO "Digite o valor em HORAS: " RESET);
+                efeitoProcessando();
+                resultado = horasParaMinutos(valor);
+                printf("\n");
+                desenharLinhaSimples(80);
+                printf(BOLD VERDE "                           RESULTADO DA CONVERSAO" RESET "\n");
+                desenharLinhaSimples(80);
+                printf("\n" BOLD "     %.2f horas" RESET "  =  " BOLD CIANO "%.2f minutos" RESET "\n\n", valor, resultado);
+                printf(DIM "     (1 hora = 60 minutos)" RESET "\n");
+                desenharLinhaSimples(80);
+                aguardarEnter();
+                break;
+                
+            case 2: // Minutos -> Segundos
+                limparTela();
+                exibirCabecalho();
+                printf("\n");
+                desenharLinhaDupla(80);
+                printf(BOLD AZUL "                    CONVERTER MINUTOS PARA SEGUNDOS" RESET "\n");
+                desenharLinhaDupla(80);
+                valor = lerNumeroPositivo("\n  " AMARELO "Digite o valor em MINUTOS: " RESET);
+                efeitoProcessando();
+                resultado = minutosParaSegundos(valor);
+                printf("\n");
+                desenharLinhaSimples(80);
+                printf(BOLD VERDE "                           RESULTADO DA CONVERSAO" RESET "\n");
+                desenharLinhaSimples(80);
+                printf("\n" BOLD "     %.2f minutos" RESET "  =  " BOLD CIANO "%.2f segundos" RESET "\n\n", valor, resultado);
+                printf(DIM "     (1 minuto = 60 segundos)" RESET "\n");
+                desenharLinhaSimples(80);
+                aguardarEnter();
+                break;
+                
+            case 3: // Segundos -> Horas
+                limparTela();
+                exibirCabecalho();
+                printf("\n");
+                desenharLinhaDupla(80);
+                printf(BOLD AZUL "                     CONVERTER SEGUNDOS PARA HORAS" RESET "\n");
+                desenharLinhaDupla(80);
+                valor = lerNumeroPositivo("\n  " AMARELO "Digite o valor em SEGUNDOS: " RESET);
+                efeitoProcessando();
+                resultado = segundosParaHoras(valor);
+                printf("\n");
+                desenharLinhaSimples(80);
+                printf(BOLD VERDE "                           RESULTADO DA CONVERSAO" RESET "\n");
+                desenharLinhaSimples(80);
+                printf("\n" BOLD "     %.2f segundos" RESET "  =  " BOLD CIANO "%.6f horas" RESET "\n\n", valor, resultado);
+                printf(DIM "     (1 hora = 3600 segundos)" RESET "\n");
+                desenharLinhaSimples(80);
+                aguardarEnter();
+                break;
+                
+            case 4: // Horas -> Tudo
+                limparTela();
+                exibirCabecalho();
+                printf("\n");
+                desenharLinhaDupla(80);
+                printf(BOLD AZUL "                   CONVERSAO COMPLETA A PARTIR DE HORAS" RESET "\n");
+                desenharLinhaDupla(80);
+                valor = lerNumeroPositivo("\n  " AMARELO "Digite o valor em HORAS: " RESET);
+                efeitoProcessando();
+                converterTudo(valor, 1);
+                aguardarEnter();
+                break;
+                
+            case 5: // Minutos -> Tudo
+                limparTela();
+                exibirCabecalho();
+                printf("\n");
+                desenharLinhaDupla(80);
+                printf(BOLD AZUL "                  CONVERSAO COMPLETA A PARTIR DE MINUTOS" RESET "\n");
+                desenharLinhaDupla(80);
+                valor = lerNumeroPositivo("\n  " AMARELO "Digite o valor em MINUTOS: " RESET);
+                efeitoProcessando();
+                converterTudo(valor, 2);
+                aguardarEnter();
+                break;
+                
+            case 6: // Segundos -> Tudo
+                limparTela();
+                exibirCabecalho();
+                printf("\n");
+                desenharLinhaDupla(80);
+                printf(BOLD AZUL "                 CONVERSAO COMPLETA A PARTIR DE SEGUNDOS" RESET "\n");
+                desenharLinhaDupla(80);
+                valor = lerNumeroPositivo("\n  " AMARELO "Digite o valor em SEGUNDOS: " RESET);
+                efeitoProcessando();
+                converterTudo(valor, 3);
+                aguardarEnter();
+                break;
+                
+            case 0:
+                limparTela();
+                printf("\n\n\n");
+                desenharLinhaDupla(80);
+                printf(BOLD CIANO "\n                    OBRIGADO POR USAR O CONVERSOR DE TEMPO!\n" RESET);
+                printf(VERDE "\n                        Programa desenvolvido com sucesso.\n" RESET);
+                desenharLinhaDupla(80);
+                printf("\n\n");
+                break;
+                
+            default:
+                exibirMensagemErro("Opcao invalida! Por favor, escolha uma opcao entre 0 e 6.");
+                aguardarEnter();
+        }
+        
+    } while(opcao != 0);
+    
+    return 0;
+}
+
+// ============================================================================
+// IMPLEMENTACAO DAS FUNCOES DE CONVERSAO - Hugo
+// ============================================================================
+
+double horasParaMinutos(double horas) {
+    return horas * 60.0;
+}
+
+double minutosParaSegundos(double minutos) {
+    return minutos * 60.0;
+}
+
+double segundosParaHoras(double segundos) {
+    return segundos / 3600.0;
+}
+
+double horasParaSegundos(double horas) {
+    return horas * 3600.0;
+}
+
+double minutosParaHoras(double minutos) {
+    return minutos / 60.0;
+}
+
+double segundosParaMinutos(double segundos) {
+    return segundos / 60.0;
+}
+
+void converterTudo(double valor, int tipoOrigem) {
+    double horas, minutos, segundos;
+    
+    // Determina as conversoes baseado no tipo de origem
+    switch(tipoOrigem) {
+        case 1: // A partir de horas
+            horas = valor;
+            minutos = horasParaMinutos(horas);
+            segundos = horasParaSegundos(horas);
+            break;
+        case 2: // A partir de minutos
+            minutos = valor;
+            horas = minutosParaHoras(minutos);
+            segundos = minutosParaSegundos(minutos);
+            break;
+        case 3: // A partir de segundos
+            segundos = valor;
+            horas = segundosParaHoras(segundos);
+            minutos = segundosParaMinutos(segundos);
+            break;
+        default:
+            return;
+    }
+    
+    printf("\n");
+    desenharLinhaSimples(80);
+    printf(BOLD VERDE "                      CONVERSAO COMPLETA - TODOS OS FORMATOS" RESET "\n");
+    desenharLinhaSimples(80);
+    printf("\n");
+    printf(BOLD "  Valor Original:  " RESET);
+    
+    if(tipoOrigem == 1) printf(AMARELO "%.2f horas" RESET "\n\n", valor);
+    else if(tipoOrigem == 2) printf(AMARELO "%.2f minutos" RESET "\n\n", valor);
+    else printf(AMARELO "%.2f segundos" RESET "\n\n", valor);
+    
+    desenharLinhaPontilhada(80);
+    printf("\n" BOLD "  Equivalencias:" RESET "\n\n");
+    printf("     " ROXO "◆" RESET " Em Horas:      " BOLD CIANO "%.6f h" RESET "\n", horas);
+    printf("     " ROXO "◆" RESET " Em Minutos:    " BOLD CIANO "%.2f min" RESET "\n", minutos);
+    printf("     " ROXO "◆" RESET " Em Segundos:   " BOLD CIANO "%.2f seg" RESET "\n\n", segundos);
+    desenharLinhaSimples(80);
+}
+
+// ============================================================================
+// IMPLEMENTACAO DAS FUNCOES DE INTERFACE - Desmond
+// ============================================================================
+
+void exibirCabecalho() {
+    printf("\n");
+    desenharLinhaDupla(80);
+    printf(BOLD CIANO "\n");
+    printf("      ██████╗ ██████╗ ███╗   ██╗██╗   ██╗███████╗██████╗ ███████╗ ██████╗ ██████╗ \n");
+    printf("     ██╔════╝██╔═══██╗████╗  ██║██║   ██║██╔════╝██╔══██╗██╔════╝██╔═══██╗██╔══██╗\n");
+    printf("     ██║     ██║   ██║██╔██╗ ██║██║   ██║█████╗  ██████╔╝███████╗██║   ██║██████╔╝\n");
+    printf("     ██║     ██║   ██║██║╚██╗██║╚██╗ ██╔╝██╔══╝  ██╔══██╗╚════██║██║   ██║██╔══██╗\n");
+    printf("     ╚██████╗╚██████╔╝██║ ╚████║ ╚████╔╝ ███████╗██║  ██║███████║╚██████╔╝██║  ██║\n");
+    printf("      ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝\n");
+    printf(RESET);
+    printf(BOLD AMARELO "\n                           >> DE TEMPO PROFISSIONAL <<\n" RESET);
+    printf(DIM "                       Horas • Minutos • Segundos\n" RESET);
+    desenharLinhaDupla(80);
+}
+
+void exibirMenu() {
+    printf("\n");
+    printf(BOLD VERDE "  ╔═══════════════════════════════════════════════════════════════════════════╗\n" RESET);
+    printf(BOLD VERDE "  ║" RESET BOLD "                          MENU PRINCIPAL DE OPCOES" RESET BOLD VERDE "                        ║\n" RESET);
+    printf(BOLD VERDE "  ╠═══════════════════════════════════════════════════════════════════════════╣\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "                                                                           " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "   " BOLD AMARELO "[1]" RESET "  Horas ────────► Minutos            " ROXO "│" RESET "  Conversao Simples        " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "   " BOLD AMARELO "[2]" RESET "  Minutos ──────► Segundos           " ROXO "│" RESET "                            " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "   " BOLD AMARELO "[3]" RESET "  Segundos ─────► Horas              " ROXO "│" RESET "                            " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "                                                                           " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "   " BOLD CIANO "[4]" RESET "  Horas ────────► Todas Unidades     " ROXO "│" RESET "  Conversao Completa       " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "   " BOLD CIANO "[5]" RESET "  Minutos ──────► Todas Unidades     " ROXO "│" RESET "                            " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "   " BOLD CIANO "[6]" RESET "  Segundos ─────► Todas Unidades     " ROXO "│" RESET "                            " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "                                                                           " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ╠═══════════════════════════════════════════════════════════════════════════╣\n" RESET);
+    printf(BOLD VERDE "  ║" RESET "   " BOLD VERMELHO "[0]" RESET "  Sair do Programa                                                   " BOLD VERDE "║\n" RESET);
+    printf(BOLD VERDE "  ╚═══════════════════════════════════════════════════════════════════════════╝\n" RESET);
+}
+
+void exibirRodape() {
+    printf("\n");
+    desenharLinhaPontilhada(80);
+    printf(DIM "  Desenvolvido por: Isaac, Hugo, Gustavo, Desmond e Vinicius" RESET "\n");
+    desenharLinhaPontilhada(80);
+}
+
+void efeitoProcessando() {
+    printf("\n  " AMARELO);
+    printf("  ⟳ Processando");
+    fflush(stdout);
+    for(int i = 0; i < 8; i++) {
+        #ifdef _WIN32
+            Sleep(150);
+        #else
+            usleep(150000);
+        #endif
+        printf(".");
+        fflush(stdout);
+    }
+    printf(" Concluido! ✓" RESET "\n");
+    #ifdef _WIN32
+        Sleep(300);
+    #else
+        usleep(300000);
+    #endif
+}
+
+void limparTela() {
+    system(CLEAR);
+}
+
+void desenharLinhaDupla(int largura) {
+    printf("  ");
+    for(int i = 0; i < largura; i++) printf("═");
+    printf("\n");
+}
+
+void desenharLinhaSimples(int largura) {
+    printf("  ");
+    for(int i = 0; i < largura; i++) printf("─");
+    printf("\n");
+}
+
+void desenharLinhaPontilhada(int largura) {
+    printf("  ");
+    for(int i = 0; i < largura; i++) printf(i % 2 == 0 ? "·" : " ");
+    printf("\n");
+}
+
+void exibirMensagemSucesso(const char *mensagem) {
+    printf("\n");
+    desenharLinhaSimples(80);
+    printf(BOLD VERDE "  ✓ SUCESSO: " RESET "%s\n", mensagem);
+    desenharLinhaSimples(80);
+}
+
+void exibirMensagemErro(const char *mensagem) {
+    printf("\n");
+    desenharLinhaSimples(80);
+    printf(BOLD VERMELHO "  ✗ ERRO: " RESET "%s\n", mensagem);
+    desenharLinhaSimples(80);
+}
+
+void aguardarEnter() {
+    printf("\n" DIM "  Pressione ENTER para continuar..." RESET);
+    getchar();
+}
+
+void exibirAnimacaoInicial() {
+    limparTela();
+    printf("\n\n\n\n\n\n");
+    printf(BOLD CIANO "                        Inicializando o Conversor de Tempo...\n" RESET);
+    printf("\n                                    ");
+    for(int i = 0; i < 30; i++) {
+        printf("█");
+        fflush(stdout);
+        #ifdef _WIN32
+            Sleep(50);
+        #else
+            usleep(50000);
+        #endif
+    }
+    printf("\n\n" VERDE "                                  Sistema Pronto!\n" RESET);
+    #ifdef _WIN32
+        Sleep(800);
+    #else
+        usleep(800000);
+    #endif
+}
+
+// ============================================================================
+// IMPLEMENTACAO DAS FUNCOES DE VALIDACAO - Gustavo
+// ============================================================================
+
+double lerNumeroPositivo(const char *mensagem) {
+    double numero;
+    int leituraValida;
+    
+    do {
+        printf("%s", mensagem);
+        leituraValida = scanf("%lf", &numero);
+        
+        while(getchar() != '\n');
+        
+        if(!leituraValida) {
+            exibirMensagemErro("Entrada invalida! Digite apenas numeros.");
+            printf("\n");
+            continue;
+        }
+        
+        if(numero < 0) {
+            exibirMensagemErro("O valor nao pode ser negativo! Digite um numero maior ou igual a zero.");
+            printf("\n");
+            leituraValida = 0;
+        }
+        
+    } while(!leituraValida || numero < 0);
+    
+    return numero;
+}
+
+int lerOpcaoMenu() {
+    int opcao;
+    int leituraValida;
+    
+    do {
+        printf("\n  " BOLD AMARELO "➤ Escolha uma opcao: " RESET);
+        leituraValida = scanf("%d", &opcao);
+        
+        while(getchar() != '\n');
+        
+        if(!leituraValida) {
+            exibirMensagemErro("Digite apenas numeros inteiros!");
+            aguardarEnter();
+            limparTela();
+            exibirCabecalho();
+            exibirMenu();
+            exibirRodape();
+            leituraValida = 0;
+        }
+        
+    } while(!leituraValida);
+    
+    return opcao;
+}
+
+int validarEntrada() {
+    char c;
+    while((c = getchar()) != '\n' && c != EOF);
+    return 1;
+}
