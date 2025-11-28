@@ -1,87 +1,107 @@
-// src/io.c (updated with better error reporting)
-#include "tarefas.h"
-#include "util.h"
+#include "../include/platform.h"
+#include "../include/io.h"
+#include "../include/tarefas.h"
+#include "../include/util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>  // For errno and perror
+#include <errno.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#include <direct.h>  // For _mkdir
-#include <io.h>      // For access()
-#define ACCESS_MODE F_OK  // Check if file exists
-#else
-#include <sys/stat.h>  // For mkdir
-#include <unistd.h>    // For access()
-#define ACCESS_MODE F_OK
-#endif
-
-// Helper function to create directory if needed
-static void criarDiretorio(const char* dir) {
-#ifdef _WIN32
-    if (_mkdir(dir) == -1 && errno != EEXIST) {
-        printf(RED "\nErro ao criar diretorio %s: %s\n" RESET, dir, strerror(errno));
-    }
-#else
-    if (mkdir(dir, 0755) == -1 && errno != EEXIST) {
-        printf(RED "\nErro ao criar diretorio %s: %s\n" RESET, dir, strerror(errno));
-    }
-#endif
+static int obterCaminhoDados(char *buffer, size_t size) {
+    snprintf(buffer, size, "..%cdata", DIR_SEPARATOR);
+    return 1;
 }
 
-void salvarArquivo() {
-    // Create 'data' directory if it doesn't exist
-    criarDiretorio("data");
+void salvarArquivo(void) {
+    char caminhoDados[512];
+    char caminhoArquivo[600];
 
-    // Check if directory exists and is writable
-    if (access("data", W_OK) != 0) {
-        printf(RED "\nDiretorio 'data' nao existe ou nao tem permissao de escrita!\n" RESET);
+    if (!obterCaminhoDados(caminhoDados, sizeof(caminhoDados))) {
+        desenharLinhaSimples(LARGURA_CAIXA);
+        printf(BOLD VERMELHO "\n  ✗ ERRO: Não foi possível determinar o diretório de dados\n" RESET);
+        desenharLinhaSimples(LARGURA_CAIXA);
         return;
     }
 
-    FILE *fp = fopen("data/historico.txt", "w");
+    snprintf(caminhoArquivo, sizeof(caminhoArquivo), "%s%chistorico.txt", 
+             caminhoDados, DIR_SEPARATOR);
+
+    FILE *fp = fopen(caminhoArquivo, "w");
     if (!fp) {
-        printf(RED "\nErro ao abrir 'data/historico.txt' para escrita: %s\n" RESET, strerror(errno));
+        desenharLinhaSimples(LARGURA_CAIXA);
+        printf(BOLD VERMELHO "\n  ✗ ERRO ao abrir '%s': %s\n" RESET, caminhoArquivo, strerror(errno));
+        desenharLinhaSimples(LARGURA_CAIXA);
         return;
     }
 
     fprintf(fp, "%d\n", totalConversoes);
-    for(int i=0; i<totalConversoes; i++) {
-        fprintf(fp, "%d\n%s\n%lf\n%lf\n%s\n",
+
+    for (int i = 0; i < totalConversoes; i++) {
+        fprintf(fp, "%d\n%s\n%.10lf\n%.10lf\n%s\n",
                 historico[i].id,
                 historico[i].tipo,
                 historico[i].valorOriginal,
                 historico[i].valorConvertido,
                 historico[i].data);
     }
+
     fclose(fp);
-    printf(GREEN "\nSalvo no arquivo!\n" RESET);
+    desenharLinhaDupla(LARGURA_CAIXA);
+    printf(BOLD VERDE "\n  ✓ Histórico salvo em arquivo: %s\n" RESET, caminhoArquivo);
+    desenharLinhaDupla(LARGURA_CAIXA);
 }
 
-void carregarArquivo() {
-    // Create 'data' directory if it doesn't exist (for consistency)
-    criarDiretorio("data");
+void carregarArquivo(void) {
+    char caminhoDados[512];
+    char caminhoArquivo[600];
 
-    FILE *fp = fopen("data/historico.txt", "r");
-    if (!fp) {
-        // No error message for load if file doesn't exist yet
+    if (!obterCaminhoDados(caminhoDados, sizeof(caminhoDados))) {
         totalConversoes = 0;
         return;
     }
 
-    fscanf(fp, "%d\n", &totalConversoes);
-    if(totalConversoes > 0) {
-        inicializarHistorico();  // Ensure allocated
-        for(int i=0; i<totalConversoes; i++) {
+    snprintf(caminhoArquivo, sizeof(caminhoArquivo), "%s%chistorico.txt",
+             caminhoDados, DIR_SEPARATOR);
+
+    FILE *fp = fopen(caminhoArquivo, "r");
+    if (!fp) {
+        totalConversoes = 0;
+        return;
+    }
+
+    if (fscanf(fp, "%d\n", &totalConversoes) != 1) {
+        desenharLinhaSimples(LARGURA_CAIXA);
+        printf(BOLD AMARELO "\n  [!] Arquivo corrompido. Histórico vazio.\n" RESET);
+        desenharLinhaSimples(LARGURA_CAIXA);
+        totalConversoes = 0;
+        fclose(fp);
+        return;
+    }
+
+    if (totalConversoes > 0) {
+        historico = malloc(totalConversoes * sizeof(Conversao));
+        if (historico == NULL) {
+            desenharLinhaSimples(LARGURA_CAIXA);
+            printf(BOLD VERMELHO "\n  ✗ Erro ao alocar histórico!\n" RESET);
+            desenharLinhaSimples(LARGURA_CAIXA);
+            totalConversoes = 0;
+            fclose(fp);
+            return;
+        }
+
+        for (int i = 0; i < totalConversoes; i++) {
             fscanf(fp, "%d\n", &historico[i].id);
-            fgets(historico[i].tipo, 30, fp);
-            historico[i].tipo[strcspn(historico[i].tipo, "\n")] = 0;
+
+            fgets(historico[i].tipo, sizeof(historico[i].tipo), fp);
+            historico[i].tipo[strcspn(historico[i].tipo, "\n")] = '\0';
+
             fscanf(fp, "%lf\n", &historico[i].valorOriginal);
             fscanf(fp, "%lf\n", &historico[i].valorConvertido);
-            fgets(historico[i].data, 20, fp);
-            historico[i].data[strcspn(historico[i].data, "\n")] = 0;
+
+            fgets(historico[i].data, sizeof(historico[i].data), fp);
+            historico[i].data[strcspn(historico[i].data, "\n")] = '\0';
         }
     }
+
     fclose(fp);
 }

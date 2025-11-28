@@ -1,85 +1,195 @@
-CRONOMAKER – Conversor de Tempo com Histórico
+CronoMaker – Conversor e Cronômetro de Tempo em C
 
-Projeto desenvolvido em Linguagem C para a disciplina de LÓGICA DE PROGRAMAÇÃO E ALGORITMOS – 2025.
+Projeto desenvolvido em linguagem C para a disciplina de *Lógica de Programação e Algoritmos – 2025* (UCB).
 
-O sistema realiza conversões de unidades de tempo (horas, minutos e segundos) e 
-registra automaticamente cada conversão, permitindo consultar, pesquisar, editar 
-e remover registros, além de salvar tudo em arquivo.
+O CronoMaker permite conversões entre horas, minutos e segundos, além de registrar automaticamente 
+cada operação num histórico consultável, pesquisável e que pode ser salvo/recuperado a partir de 
+um arquivo de texto. Também inclui um cronômetro animado integrado ao registro.
 
-==================================================================================
-
-ESTRUTURA DO PROJETO
+---
+Estrutura do Projeto
 
 ProjetoCronoMaker/
 │
-├── src/             → arquivos .c (código fonte)
+├── src/            # Código-fonte (.c)
 │   ├── main.c
 │   ├── tarefas.c
 │   ├── io.c
-│   ├── util.c
+│   └── util.c
 │
-├── include/         → arquivos .h (cabeçalhos)
+├── include/        # Cabeçalhos (.h)
 │   ├── tarefas.h
 │   ├── io.h
 │   ├── util.h
+│   └── platform.h
 │
-├── data/            → arquivos gerados (histórico.txt)
+├── data/           # Dados salvos pelo sistema
 │   └── historico.txt
 │
-├── docs/            → relatório, README, apresentação
+├── docs/           # Documentação e relatórios
 │   ├── README.md
 │   └── Relatorio.pdf
 │
-└── compilado/       → opcional (onde fica o .exe)
+└── compilado/      # Local para o executável
+```
+Funcionalidades
 
+- Conversões de Tempo
+- Converter **horas ↔ minutos**
+- Converter **minutos ↔ segundos**
+- Converter **segundos ↔ horas**
+- Registro automático de cada conversão com data/hora
 
-==================================================================================
+Gerenciamento de Histórico
 
-FUNCIONALIDADES IMPLEMENTADAS
+- *Ver histórico completo* com todos os registros
+- *Pesquisar* registros por tipo específico
+- *Limpar* todo o histórico de uma vez
+- *Salvar* e *carregar* histórico em arquivo `.txt`
+- Listagem organizada com ID, tipo, valores e data/hora
 
-* Converter horas, minutos e segundos
-* Registrar conversão automaticamente com ID
-* Listar histórico completo
-* Pesquisar registros por ID ou tipo
-* Editar registros
-* Remover registros individualmente
-* Limpar todo o histórico
-* Salvar e carregar dados em arquivo .txt
-* Uso de malloc e realloc para expansão dinâmica
-* Modularização completa (.c e .h)
+Cronômetro
 
-==================================================================================
+- Cronômetro animado com precisão de milissegundos
+- Controle intuitivo (ENTER para iniciar/parar)
+- Salvar medições direto no histórico
 
-TECNOLOGIAS UTILIZADAS
+Persistência de Dados
 
-* Linguagem C
-* Structs e Typedef
-* Alocação dinâmica (malloc, realloc, free)
-* Manipulação de arquivos com fopen, fprintf, fscanf
-* Modularização com múltiplos arquivos .c e .h
-* Interface em modo texto (CLI)
+- Carregamento automático do histórico ao iniciar
+- Salvamento manual ou automático ao sair
+- Formato de arquivo texto legível
+- Gerenciamento dinâmico com alocação de memória
 
-==================================================================================
+Interface
 
-COMO COMPILAR E EXECUTAR
+- Menu interativo em modo texto (CLI)
+- Cores ANSI para melhor experiência visual
+- Caixas centralizadas e bordas desenhadas
+- Feedback visual em todas as operações
+- Compatível com Windows 10+ e Linux
 
-para comopilar é necessario estar na pasta do projeto: cd/downloads cd/ProjetoCronoMaker;
+---
 
-No Windows (PowerShell ou MinGW):
-gcc -Wall -std=c99 -Iinclude -o compilado/cronomaker.exe src/*.c
+Tecnologias Utilizadas
 
-para executar:
+- *Linguagem C** (C99)
+- *Structs* (`typedef struct`)
+- *Alocação dinâmica* (`malloc`, `realloc`, `free`)
+- *Manipulação de arquivos* texto (`fopen`, `fprintf`, `fscanf`)
+- *Modularização* com múltiplos arquivos `.c` e `.h`
+- *Interface texto* (CLI) com ANSI colors
+- *Gerenciamento de memória* dinâmica
+
+---
+Como Compilar e Executar
+
+No *Windows* (MinGW):
+
+No prompt/pasta do projeto (`ProjetoCronoMaker`):
+
+gcc -Iinclude -o compilado/cronomaker.exe src/main.c src/tarefas.c src/util.c src/io.c
+
+Depois, execute:
+
 cd compilado
 
-logo apos:
 cronomaker.exe
 
+No **Linux**:
 
-==================================================================================
+Da pasta do projeto:
 
-AUTORES
+gcc -Iinclude -o compilado/cronomaker src/main.c src/tarefas.c src/util.c src/io.c
 
-Nome dos alunos : ISAAC ALONÇO ITACARAMBI DE SOUZA SILVA, DESMOND ABOAGYE, GUSTAVO JUNIO DE SOUZA PEREIRA & HUGO OLIVEIRA DA SILVA.
-Curso: Bacharelado em Ciências da Computação.
-Professor: ADAM SMITH GONTIJO BRITO DE ASSIS.
-Instituição: (UCB )Universidade Católica de Brasília - Câmpus Taguatinga.
+chmod +x compilado/cronomaker
+
+./compilado/cronomaker
+
+---
+Exemplos de Uso
+
+  Conversões:
+- *Horas → Minutos*: Digite as horas e obtenha os minutos equivalentes
+- *Minutos → Segundos*: Converta minutos para segundos
+- *Segundos → Horas*: Transforme segundos em horas decimais
+- Todas as conversões são registradas automaticamente no histórico
+
+  Histórico:
+- *Listar tudo*: Veja todas as conversões e medições realizadas
+- *Pesquisar*: Filtre por tipo (ex: "Cronômetro", "Horas → Minutos")
+- *Remover*: Delete registros específicos por ID
+- *Limpar*: Apague todo o histórico de uma vez
+- *Salvar/Recuperar*: Dados persistem entre execuções
+
+Cronômetro:
+- Pressione *ENTER* para iniciar a contagem
+- Pressione *ENTER* novamente para parar
+- Opção de salvar o tempo medido no histórico
+- Animação visual durante a contagem
+
+---
+
+Estruturas de Dados
+
+```c
+typedef struct {
+    int id;              // Identificador único do registro
+    char tipo[30];       // Tipo de operação realizada
+    double valorOriginal;    // Valor de entrada
+    double valorConvertido;  // Valor de saída/resultado
+    char data[20];       // Data e hora da operação
+} Conversao;
+```
+
+Características do Sistema:
+
+- O histórico é um *vetor dinâmico* que cresce com `realloc()` conforme necessário
+- Capacidade inicial: 5 registros
+- Expansão automática quando o limite é atingido
+- Os dados são salvos/carregados de `data/historico.txt` para persistência
+- Liberação de memória (`free()`) ao encerrar o programa
+
+---
+
+Observações
+
+- O programa utiliza *ANSI Colors* em terminais compatíveis (Linux/Windows 10+)
+- Interface totalmente em **modo texto CLI*
+- Arquivo de histórico é salvo automaticamente (ou manualmente, se desejar!)
+- Suporte a UTF-8 para caracteres especiais
+- Código modular e bem documentado
+- Tratamento de erros em entradas inválidas
+
+---
+
+Autores
+
+*Isaac Alonço Itacarambi de Souza Silva*  
+*Desmond Aboagye*  
+*Gustavo Junio de Souza Pereira*  
+*Hugo Oliveira da Silva*
+
+*Curso:* Bacharelado em Ciências da Computação  
+*Professor:* Adam Smith Gontijo Brito de Assis  
+*Instituição:* Universidade Católica de Brasília (UCB) — Câmpus Taguatinga  
+*Ano:* 2025
+
+Integridade Acadêmica
+
+Este projeto foi desenvolvido integralmente pela equipe acima, em ambiente acadêmico. 
+
+*Ferramentas de apoio consultadas:*
+- ChatGPT (OpenAI) — sugestões de modularização e boas práticas
+- Claude AI (Anthropic) — revisão lógica e documentação
+- Grok AI (xAI) — análise de ponteiros e gerenciamento de memória
+
+*Materiais de referência:*
+- Curso em Vídeo (Gustavo Guanabara)
+- Programação Dinâmica
+- Fessor Bruno
+- Filipe Deschamps
+
+Todo o código e suas soluções são *originais da equipe*.
+
+*Desenvolvido com ❤️ em C* | *UCB 2025* | *CronoMaker v1.0*

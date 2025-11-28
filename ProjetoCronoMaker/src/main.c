@@ -1,146 +1,117 @@
-// src/main.c (unchanged, but references the updated header)
+#include "../include/platform.h"
+#include "../include/tarefas.h"
+#include "../include/util.h"
+#include "../include/io.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "tarefas.h"
-#include "util.h"
-#include "io.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#define SLEEP_MS(ms) Sleep(ms)
-#else
-#include <unistd.h>
-#define SLEEP_MS(ms) usleep((ms) * 1000)
-#endif
+typedef struct {
+    const char *titulo;
+    double (*func)(double);
+    const char *origem;
+    const char *destino;
+} ConversaoOption;
 
-// Function to display a simple loading animation (ASCII spinner)
-void loadingAnimation() {
-    printf(CIANO "\nIniciando CRONOMAKER" RESET);
-    const char *spinner[4] = {
-        "|", "/", "-", "\\"
-    };
-    for(int i = 0; i < 20; i++) {
-        printf("\r%s", spinner[i % 4]);
-        fflush(stdout);
-        SLEEP_MS(100);
-    }
-    printf("\r" VERDE "Pronto!\n" RESET);
-}
-
-int main() {
+int main(void) {
     habilitar_ansi_windows();
-    loadingAnimation();  // Startup animation
-    inicializarHistorico();
+
     carregarArquivo();
+    if (historico == NULL) {
+        inicializarHistorico();
+    }
 
-    int opcao;
-    double valor, resultado;
+    ConversaoOption opcoes[] = {
+        {"Horas → Minutos",       horasParaMinutos,      "HORAS", "MINUTOS"},
+        {"Minutos → Segundos",    minutosParaSegundos,   "MINUTOS", "SEGUNDOS"},
+        {"Segundos → Horas",      segundosParaHoras,     "SEGUNDOS", "HORAS"},
+        {"Horas → Segundos",      horasParaSegundos,     "HORAS", "SEGUNDOS"},
+        {"Minutos → Horas",       minutosParaHoras,      "MINUTOS", "HORAS"},
+        {"Segundos → Minutos",    segundosParaMinutos,   "SEGUNDOS", "MINUTOS"}
+    };
+    const int nOpcoesConversao = sizeof(opcoes) / sizeof(opcoes[0]);
 
-    do {
-        limparTela();
+    int sair = 0;
+
+    while (!sair) {
         exibirCabecalho();
-        printf("\n  " MAGENTA "Escolha uma opcao: " RESET);
-        scanf("%d", &opcao);
-        while(getchar() != '\n');
+        exibirMenu();
+        exibirRodape();
 
-        switch(opcao) {
-            case 1: // Horas -> Minutos
-                limparTela();
-                printf("\n" BOLD AZUL "=== HORAS PARA MINUTOS ===" RESET "\n\n");
-                valor = lerNumeroPositivo("Digite o valor em HORAS: ");
-                resultado = horasParaMinutos(valor);
-                printf("\n" VERDE "Resultado: %.2f horas = %.2f minutos\n" RESET, valor, resultado);
-                adicionarNoHistorico("Horas -> Minutos", valor, resultado);
-                pausar();
+        printf("\n" BOLD AMARELO "➤ Digite sua opção: " RESET);
+
+        int opcao;
+        if (scanf("%d", &opcao) != 1) {
+            limpar_stdin();
+            printf(BOLD VERMELHO "  ✗ ERRO: Entrada inválida!\n" RESET);
+            pausar();
+            continue;
+        }
+        limpar_stdin();
+
+        switch (opcao) {
+            case 1:
+                while (1) {
+                    exibirCabecalho();
+                    printf(BOLD BRANCO "  ╔═══════════════════════════════════════╗\n");
+                    printf("  ║         OPÇÕES DE CONVERSÃO           ║\n");
+                    printf("  ╠═══════════════════════════════════════╣\n");
+                    for (int i = 0; i < nOpcoesConversao; i++) {
+                        printf("  ║  [%d]  %s\n", i+1, opcoes[i].titulo);
+                    }
+                    printf("  ╚═══════════════════════════════════════╝\n");
+                    printf("  [7] Voltar ao Menu Principal\n");
+
+                    int escolha;
+                    printf("\n" BOLD AMARELO "➤ Digite o número da conversão desejada: " RESET);
+                    if (scanf("%d", &escolha) != 1 || escolha < 1 || escolha > nOpcoesConversao + 1) {
+                        limpar_stdin();
+                        printf(BOLD VERMELHO "  ✗ ERRO: Opção inválida!\n" RESET);
+                        pausar();
+                        continue;
+                    }
+                    limpar_stdin();
+                    if (escolha == nOpcoesConversao + 1) break;
+                    ConversaoOption *opt = &opcoes[escolha-1];
+                    processarConversao(opt->titulo, opt->func, opt->origem, opt->destino);
+                    pausar();
+                }
                 break;
-                
-            case 2: // Minutos -> Segundos
-                limparTela();
-                printf("\n" BOLD AZUL "=== MINUTOS PARA SEGUNDOS ===" RESET "\n\n");
-                valor = lerNumeroPositivo("Digite o valor em MINUTOS: ");
-                resultado = minutosParaSegundos(valor);
-                printf("\n" VERDE "Resultado: %.2f minutos = %.2f segundos\n" RESET, valor, resultado);
-                adicionarNoHistorico("Minutos -> Segundos", valor, resultado);
-                pausar();
-                break;
-                
-            case 3: // Segundos -> Horas
-                limparTela();
-                printf("\n" BOLD AZUL "=== SEGUNDOS PARA HORAS ===" RESET "\n\n");
-                valor = lerNumeroPositivo("Digite o valor em SEGUNDOS: ");
-                resultado = segundosParaHoras(valor);
-                printf("\n" VERDE "Resultado: %.2f segundos = %.6f horas\n" RESET, valor, resultado);
-                adicionarNoHistorico("Segundos -> Horas", valor, resultado);
-                pausar();
-                break;
-                
-            case 4: // Horas -> Segundos
-                limparTela();
-                printf("\n" BOLD AZUL "=== HORAS PARA SEGUNDOS ===" RESET "\n\n");
-                valor = lerNumeroPositivo("Digite o valor em HORAS: ");
-                resultado = horasParaSegundos(valor);
-                printf("\n" VERDE "Resultado: %.2f horas = %.2f segundos\n" RESET, valor, resultado);
-                adicionarNoHistorico("Horas -> Segundos", valor, resultado);
-                pausar();
-                break;
-                
-            case 5: // Minutos -> Horas
-                limparTela();
-                printf("\n" BOLD AZUL "=== MINUTOS PARA HORAS ===" RESET "\n\n");
-                valor = lerNumeroPositivo("Digite o valor em MINUTOS: ");
-                resultado = minutosParaHoras(valor);
-                printf("\n" VERDE "Resultado: %.2f minutos = %.6f horas\n" RESET, valor, resultado);
-                adicionarNoHistorico("Minutos -> Horas", valor, resultado);
-                pausar();
-                break;
-                
-            case 6: // Segundos -> Minutos
-                limparTela();
-                printf("\n" BOLD AZUL "=== SEGUNDOS PARA MINUTOS ===" RESET "\n\n");
-                valor = lerNumeroPositivo("Digite o valor em SEGUNDOS: ");
-                resultado = segundosParaMinutos(valor);
-                printf("\n" VERDE "Resultado: %.2f segundos = %.2f minutos\n" RESET, valor, resultado);
-                adicionarNoHistorico("Segundos -> Minutos", valor, resultado);
-                pausar();
-                break;
-                
-            case 7: // Ver historico
+            case 2:
+                exibirCabecalho();
                 listarHistorico();
                 pausar();
                 break;
-                
-            case 8: // Pesquisar historico
+            case 3:
+                exibirCabecalho();
                 menuPesquisar();
                 pausar();
                 break;
-                
-            case 9: // Limpar historico
-                limparHistorico();
+            case 4:
+                exibirCabecalho();
+                cronometro();
                 pausar();
                 break;
-                
-            case 10: // Salvar
+            case 5:
                 salvarArquivo();
-                printf("\n" VERDE "Historico salvo com sucesso!\n" RESET);
+                printf(BOLD VERDE "  ✓ Histórico salvo com sucesso!\n" RESET);
                 pausar();
                 break;
-                
+            case 6:
+                limparHistorico();
+                printf(BOLD VERDE "  ✓ Histórico APAGADO!\n" RESET);
+                pausar();
+                break;
             case 0:
                 salvarArquivo();
-                printf("\n" CIANO "Salvando e saindo...\n" RESET);
+                printf(BOLD VERDE "  Até a próxima!\n" RESET);
+                sair = 1;
                 break;
-                
             default:
-                printf("\n" VERMELHO "Opcao invalida!\n" RESET);
+                printf(BOLD VERMELHO "  ✗ ERRO: Opção inválida!\n" RESET);
                 pausar();
         }
-        
-    } while(opcao != 0);
-    
-    // Libera memoria
+    }
+
     liberarMemoria();
-    
-    return 0;
+    return EXIT_SUCCESS;
 }
